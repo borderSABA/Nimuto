@@ -1,15 +1,12 @@
-# NIMT ONLINE v2.2
+# NIMT ONLINE v2.3
 
-GitHub Pages表示用です。
+## 更新内容
+- 全員のカード確定後、数字の小さい順に1枚ずつ処理
+- 「今回出されたカード」から対象列の設置枠へカードが移動する演出
+- 6枚目・最小カードによる引き取り時に中央へ得失点表示
+  - 例：`CPU 1 +5点`
+  - 例：`プレイヤー -4点`
+- 得点表示も中央演出のタイミングで更新
+- 演出中は次のカード操作をロック
 
-## GitHubへアップするもの
-この「GitHubアップ用」フォルダの**中身**を、Nimutoリポジトリ直下へアップしてください。
-
-- index.html
-- README.md
-
-プレイURL:
-https://bordersaba.github.io/Nimuto/
-
-オンライン通信先:
-https://nimto-online.naitoryo7110.workers.dev
+このフォルダの中身をGitHubのNimutoリポジトリ直下へアップしてください。
