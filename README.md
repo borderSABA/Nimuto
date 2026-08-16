@@ -1,64 +1,52 @@
-# NIMT ONLINE v2.0
+# NIMT ONLINE v2.1
 
-Cloudflare Workers + Durable Objects で動くオンライン版です。
+Cloudflare Workers + Durable Objects と GitHub Pages を分離したオンライン版です。
 
-## 実装済み
-- 2〜10人オンライン対戦
-- 固定4部屋
-- WebSocket同期
-- 再接続（同じブラウザなら同じ席・手札へ復帰）
-- 手札と提出カードは本人だけに表示
-- 全員提出後に同時公開
-- 数字の小さい順にサーバー側で処理
-- 全列より小さいカードの場合、対象プレイヤーだけが列選択
-- 5枚の固定カード設置枠
-- PC / スマホともページスクロールなし
-- 手動部屋初期化
-- 無人30分で自動初期化
+## 公開URL
 
-## モード
-### 減点式
-- 初期持ち点を1〜9999で設定可能（初期値66）
-- 6枚目で列を取る → 牛マーク分を減点
-- 全列より小さく列を取る → 牛マーク分を減点
-- 0点以下になった時点でゲーム終了
-- 残り点が高い順に順位決定
+- GitHub Pages（プレイ用）  
+  `https://bordersaba.github.io/Nimuto/`
 
-### 加点式
-- ゴール点を1〜9999で設定可能（初期値66）
-- 6枚目で列を取る → 牛マーク分を加点
-- 全列より小さく列を取る → 牛マーク分を減点
-- ゴール点以上になった時点でゲーム終了
-- 得点が高い順に順位決定
+- Cloudflare Workers（対戦サーバー）  
+  `https://nimto-online.naitoryo7110.workers.dev`
 
-## デプロイ
-### Windows
-`1_DEPLOY_SERVER.bat` をダブルクリックしてください。
+GitHub Pagesから開いた場合、API / WebSocket は自動的に上記Workersへ接続します。
 
-### コマンド
-```bash
-npm install
-npx wrangler deploy
+## GitHubへアップするもの
+
+このZIPを展開した**中身をすべて**、GitHubリポジトリ `Nimuto` の直下へ上書きしてください。
+
+重要なのは次の構成です。
+
+```text
+Nimuto/
+├─ index.html              ← GitHub Pagesが表示するゲーム本体
+├─ package.json
+├─ wrangler.jsonc
+├─ README.md
+├─ 0_CHECK_ENVIRONMENT.bat
+├─ 1_DEPLOY_SERVER.bat
+├─ DEPLOY_SERVER.bat
+├─ 2_LOCAL_TEST.bat
+├─ public/
+│  └─ index.html           ← Workers直アクセス時のゲーム本体
+└─ src/
+   └─ index.js             ← Durable Objects / API / WebSocket
 ```
 
-デプロイ後に表示される `https://...workers.dev` がゲームURLです。
+## 更新手順
 
-## ローカルテスト
-`2_LOCAL_TEST.bat` または以下を実行します。
+1. ZIPを展開します。
+2. 中身をGitHubの `Nimuto` リポジトリへ上書きします。
+3. GitHub Pagesはルートの `index.html` を読み込むため、README表示ではなくゲーム画面になります。
+4. ローカルの同じフォルダで `DEPLOY_SERVER.bat` を実行してWorkersも再デプロイします。
+5. Workers再デプロイ後、GitHub PagesからAPIへ接続できます。
 
-```bash
-npm install
-npx wrangler dev
-```
+## v2.1修正点
 
-## GitHub
-このフォルダの中身をそのままリポジトリ直下へアップロードできます。
-
-
-## BATが起動できない場合
-1. ZIPを右クリックして「すべて展開」してください。
-2. 展開後のフォルダ内で `0_CHECK_ENVIRONMENT.bat` を先に実行できます。
-3. 問題がなければ `DEPLOY_SERVER.bat` を実行してください。
-4. エラー時もウィンドウが閉じず、原因が画面に残ります。
-
-※ ZIPの中からBATを直接ダブルクリックしないでください。
+- GitHub Pages用 `index.html` をリポジトリ直下へ追加
+- GitHub PagesからのAPI接続先を `https://nimto-online.naitoryo7110.workers.dev` に固定
+- GitHub PagesからのWebSocket接続先を同Workersへ固定
+- Worker APIへCORSレスポンスを追加
+- `/api/reset` のCORSプリフライトに対応
+- Workers直アクセス / `wrangler dev` は従来どおり同一origin接続

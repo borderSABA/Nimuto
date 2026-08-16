@@ -4,10 +4,21 @@ const ROOM_IDS = ["1", "2", "3", "4"];
 const MAX_PLAYERS = 10;
 const AUTO_RESET_MS = 30 * 60 * 1000;
 
+const CORS_HEADERS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET,POST,OPTIONS",
+  "access-control-allow-headers": "content-type",
+  "access-control-max-age": "86400",
+};
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      ...CORS_HEADERS,
+    },
   });
 }
 
@@ -89,6 +100,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (request.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
     if (url.pathname === "/api/rooms" && request.method === "GET") {
       const summaries = await Promise.all(ROOM_IDS.map(async (roomId) => {
         const stub = env.NIMTO_ROOM.getByName(`room-${roomId}`);
@@ -104,7 +119,8 @@ export default {
       if (!ROOM_IDS.includes(roomId)) return json({ error: "invalid room" }, 400);
       const stub = env.NIMTO_ROOM.getByName(`room-${roomId}`);
       const res = await stub.fetch("https://internal/reset", { method: "POST" });
-      return res;
+      const data = await res.json().catch(() => ({ ok: res.ok }));
+      return json(data, res.status);
     }
 
     const wsMatch = url.pathname.match(/^\/ws\/(1|2|3|4)$/);
